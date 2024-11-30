@@ -23,6 +23,12 @@ class ServiceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Dịch Vụ';
 
+    public static function getModelLabel(): string
+    {
+        return 'Dịch Vụ';
+    }
+
+
     protected static ?string $model = Service::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rocket-launch';
