@@ -3,6 +3,11 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\ServiceResource;
+use App\Filament\Resources\TaskResource;
+use App\Filament\Resources\TaskServiceResource;
+use App\Filament\Resources\UserResource;
+use App\Filament\Widgets\DashboardChart;
+use App\Filament\Widgets\DashboardStatsOverview;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -38,6 +43,10 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
+            ->widgets([
+                DashboardStatsOverview::class,
+                DashboardChart::class,
+            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->middleware([
                 EncryptCookies::class,
@@ -55,7 +64,10 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->resources([
+                UserResource::class,
+                TaskResource::class,
                 ServiceResource::class,
+                TaskServiceResource::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
