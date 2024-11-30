@@ -16,6 +16,7 @@ class UserTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Tên')
                     ->searchable()
                     ->sortable(),
 
@@ -24,12 +25,14 @@ class UserTable
                     ->sortable(),
 
                 TextColumn::make('roles.name')
+                    ->label('Vai trò')
                     ->badge() // Hiển thị roles dạng badge
                     ->color('primary') // Màu của badge
                     ->separator(',') // Phân cách giữa các roles
                     ->searchable(),
 
                 TextColumn::make('created_at')
+                    ->label('Ngày tạo')
                     ->dateTime()
                     ->sortable(),
             ])
