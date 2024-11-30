@@ -66,6 +66,7 @@ class TaskServiceResource extends Resource
                             ->suffix(fn ($get) => $get('unit')),
 
                         Forms\Components\TextInput::make('money_received')
+                            ->maxLength(15)
                             ->numeric()
                             ->label('Số tiền')
                             ->placeholder('Nhập số tiền')
@@ -78,6 +79,7 @@ class TaskServiceResource extends Resource
                     ->icon('heroicon-o-flag')
                     ->schema([
                         Forms\Components\Select::make('status')
+                            ->label('Trạng thái')
                             ->options([
                                 'pending' => 'Chờ xử lý',
                                 'in_progress' => 'Đang thực hiện',
