@@ -22,9 +22,10 @@ class UserForm
 
     private static function createLeftColumn(): Section
     {
-        return Section::make('User Information')
+        return Section::make('Thông tin người dùng')
             ->schema([
                 TextInput::make('name')
+                    ->label('Tên')
                     ->required()
                     ->maxLength(255),
 
@@ -35,6 +36,7 @@ class UserForm
                     ->unique(ignoreRecord: true),
 
                 TextInput::make('password')
+                    ->label('Mật khẩu')
                     ->password()
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->minLength(8)
@@ -44,6 +46,7 @@ class UserForm
 
                 TextInput::make('password_confirmation')
                     ->password()
+                    ->label('Xác nhận mật khẩu')
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->minLength(8)
                     ->visible(fn(string $operation): bool => $operation === 'create')
@@ -54,9 +57,10 @@ class UserForm
 
     private static function createRightColumn(): Section
     {
-        return Section::make('Roles')
+        return Section::make('Vai trò')
             ->schema([
                 Select::make('roles')
+                    ->label('Vai trò')
                     ->multiple()
                     ->relationship('roles', 'name')
                     ->preload()
