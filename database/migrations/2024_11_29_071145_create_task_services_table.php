@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->foreignId('task_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity');
-            $table->decimal('money_received', 10, 2);
-            $table->string('status');
+            $table->integer('quantity')->nullable();
+            $table->decimal('money_received', 15, 0)->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }
