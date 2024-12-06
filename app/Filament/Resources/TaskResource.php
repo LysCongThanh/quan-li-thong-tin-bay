@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TaskResource\Pages;
 use App\Models\Task;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Builder;
 
 class TaskResource extends Resource
 {
@@ -146,21 +148,44 @@ class TaskResource extends Resource
                 Tables\Filters\SelectFilter::make('support')
                     ->relationship('support', 'name')
                     ->label('Lọc theo nhân viên hỗ trợ'),
-            ])
+//                Tables\Filters\Filter::make('created_at')
+//                    ->form([
+//                        Forms\Components\DatePicker::make('created_from')
+//                            ->label('Từ ngày')
+//                            ->columnSpan(1)
+//                            ->native(false)
+//                            ->displayFormat('d/m/Y'),
+//                        Forms\Components\DatePicker::make('created_until')
+//                            ->label('Đến ngày')
+//                            ->columnSpan(1)
+//                            ->native(false)
+//                            ->displayFormat('d/m/Y'),
+//                    ])
+//                    ->columns(2)
+//                    ->columnSpan(2)
+//                    ->query(function (Builder $query, array $data): Builder {
+//                        return $query
+//                            ->when(
+//                                $data['created_from'],
+//                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+//                            )
+//                            ->when(
+//                                $data['created_until'],
+//                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+//                            );
+//                    }),
+            ], layout: Tables\Enums\FiltersLayout::Dropdown)
             ->filtersFormColumns(2)
             ->actions([
-                ActionGroup::make([
-                    Tables\Actions\ViewAction::make()
-                        ->modalWidth('5xl')
-                        ->modalHeading('Chi tiết công việc'),
-                    Tables\Actions\EditAction::make()
-                        ->visible(fn() => auth()->user()->hasRole(['super_admin', 'owner'])),
-                    Tables\Actions\Action::make('report')
-                        ->label('Báo cáo công việc')
-                        ->icon('heroicon-o-document-text')
-                        ->color('success')
-                        ->url(fn(Task $record): string => TaskServiceResource::getUrl('list', ['task_id' => $record->id]))
-                ])
+                Tables\Actions\ViewAction::make()
+                    ->visible(fn() => !auth()->user()->hasRole(['super_admin', 'owner'])),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['super_admin', 'owner'])),
+                Tables\Actions\Action::make('report')
+                    ->label('Báo cáo công việc')
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->url(fn(Task $record): string => TaskServiceResource::getUrl('list', ['task_id' => $record->id]))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

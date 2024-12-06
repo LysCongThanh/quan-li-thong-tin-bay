@@ -37,8 +37,8 @@ class ListTaskServices extends ListRecords
         $task = \App\Models\Task::find($taskId);
 
         return [
-            '/admin/tasks' => 'Công việc',
-            '/admin/task-services/' . $taskId => 'Báo cáo',
+            '/tasks' => 'Công việc',
+            '/task-services/' . $taskId => 'Báo cáo',
             '' => 'Danh sách'
         ];
     }

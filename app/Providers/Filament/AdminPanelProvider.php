@@ -32,8 +32,11 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+                        ->brandLogo('https://goldenbeeltd.vn/storage/images/logo-goldenbee.png')
+            ->favicon('https://goldenbeeltd.vn/storage/images/logo-goldenbee.png')
+                        ->brandLogoHeight('45px')
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->login(Login::class)
             // *** Khi nào cần cho người dùng quản trị đăng ký
             // ->registration(Register::class)
@@ -41,7 +44,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+               Pages\Dashboard::class,
             ])
             ->widgets([
                 DashboardStatsOverview::class,
@@ -64,8 +67,8 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->resources([
-                UserResource::class,
                 TaskResource::class,
+                UserResource::class,
                 ServiceResource::class,
                 TaskServiceResource::class,
             ])

@@ -23,6 +23,8 @@ class TaskServiceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $pluralModelLabel = 'Báo cáo công việc';
+
     public static function shouldRegisterNavigation(): bool
     {
         return false;

@@ -24,8 +24,8 @@ class EditTaskService extends EditRecord
         $task = Task::find($this->task_id);
 
         return [
-            '/admin/tasks' => 'Công việc',
-            '/admin/task-services/' . $this->task_id => 'Báo cáo công việc: ' . ($task ? $task->name : ''),
+            '/tasks' => 'Công việc',
+            '/task-services/' . $this->task_id => 'Báo cáo công việc: ' . ($task ? $task->name : ''),
             '' => 'Chỉnh sửa'
         ];
     }

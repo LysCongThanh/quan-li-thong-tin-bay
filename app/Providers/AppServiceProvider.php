@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Schema::defaultStringLength(191);
+
+         FilamentView::registerRenderHook(
+            PanelsRenderHook::FOOTER,
+            fn(): View => view('filament.components.panel-footer'),
+        );
     }
 }
