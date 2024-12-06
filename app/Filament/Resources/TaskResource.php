@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TaskResource\Pages;
+use App\Models\Customer;
 use App\Models\Task;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms;
@@ -93,11 +94,19 @@ class TaskResource extends Resource
                     ->description('Thông tin về khách hàng yêu cầu công việc')
                     ->icon('heroicon-o-user')
                     ->schema([
-                        Forms\Components\TextInput::make('customer_name')
+                        Forms\Components\Select::make('customer_name')
                             ->label('Tên khách hàng')
+                            ->options(Customer::all()->pluck('name', 'name'))
+                            ->searchable()
+                            ->preload()
                             ->required()
-                            ->placeholder('Nhập tên khách hàng')
-                            ->maxLength(255),
+                            ->placeholder('Chọn tên khách hàng')
+                            ->live()
+                            ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
+                                if ($operation === 'edit' || $operation === 'create') {
+                                    $set('customer_id', null);
+                                }
+                            })
                     ])->columnSpan(1),
             ])->columns(2);
     }
