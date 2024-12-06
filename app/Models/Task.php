@@ -18,7 +18,10 @@ class Task extends Model
         'pilot_id',
         'support_id'
     ];
-
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer.name', 'name');
+    }
     public function pilot(): BelongsTo
     {
         return $this->belongsTo(User::class, 'pilot_id');
