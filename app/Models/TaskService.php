@@ -12,11 +12,39 @@ class TaskService extends Model
 
     protected $fillable = [
         'service_id',
+        'service_name',
+        'service_unit',
         'task_id',
         'quantity',
         'money_received',
-        'status'
+        'status',
+        'note',
+        'reported_by'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($taskService) {
+            if ($service = $taskService->service) {
+                $taskService->service_name = $service->name;
+                $taskService->service_unit = $service->unit;
+            }
+        });
+
+        static::updating(function ($taskService) {
+            if ($service = $taskService->service) {
+                $taskService->service_name = $service->name;
+                $taskService->service_unit = $service->unit;
+            }
+        });
+    }
+
+    public function reporter()
+    {
+        return $this->belongsTo(User::class, 'reported_by');
+    }
 
     public function task(): BelongsTo
     {

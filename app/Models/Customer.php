@@ -12,6 +12,6 @@ class Customer extends Model
     protected $fillable = ['name', 'email', 'phone', 'address'];
     public function tasks(): HasMany
     {
-        return $this->hasMany(Task::class, 'customer.name', 'name'); // Nếu liên kết qua tên
+        return $this->hasMany(Task::class); // Nếu liên kết qua tên
     }
 }

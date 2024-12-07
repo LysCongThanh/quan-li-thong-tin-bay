@@ -59,13 +59,14 @@ class TaskServiceResource extends Resource
                                     $set('unit', $unit);
                                 }
                             })
-                            ->columnSpan(2),
+                            ->columnSpan(['sm' => 'full', 'lg' => 2]),
 
                         Forms\Components\TextInput::make('quantity')
                             ->numeric()
                             ->label('Số lượng')
                             ->placeholder('Nhập số lượng')
-                            ->suffix(fn ($get) => $get('unit')),
+                            ->suffix(fn ($get) => $get('unit'))
+                            ->columnSpan(['sm' => 'full', 'lg' => 1]),
 
                         Forms\Components\TextInput::make('money_received')
                             ->maxLength(15)
@@ -73,8 +74,12 @@ class TaskServiceResource extends Resource
                             ->label('Số tiền')
                             ->placeholder('Nhập số tiền')
                             ->prefix('VND')
-                            ->numeric(),
-                    ])->columns(2),
+                            ->numeric()
+                            ->columnSpan(['sm' => 'full', 'lg' => 1]),
+                    ])->columns([
+                        'sm' => 1,
+                        'lg' => 2
+                    ]),
 
                 Forms\Components\Section::make('Trạng thái')
                     ->description('Cập nhật trạng thái của dịch vụ')
@@ -91,7 +96,25 @@ class TaskServiceResource extends Resource
                             ->required()
                             ->default('pending')
                             ->native(false)
-                    ])->columnSpan(1),
+                    ])->columnSpan(['sm' => 'full', 'lg' => '1']),
+
+                Forms\Components\Section::make('Thông tin báo cáo')
+                    ->description('Thông tin về người báo cáo và ghi chú')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->schema([
+                        Forms\Components\Hidden::make('reported_by')
+                            ->default(auth()->id()),
+
+                        Forms\Components\Textarea::make('note')
+                            ->label('Ghi chú')
+                            ->placeholder('Nhập ghi chú về công việc (nếu có)')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpan(['sm' => 'full', 'lg' => '1']),
+            ])->columns([
+                'sm' => 1,  // 1 cột trên mobile
+                'lg' => 2   // 1 cột trên desktop
             ]);
     }
 
@@ -104,17 +127,14 @@ class TaskServiceResource extends Resource
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('service.name')
+                Tables\Columns\TextColumn::make('service_name')
                     ->label('Tên dịch vụ')
-                    ->searchable()
-                    ->sortable()
                     ->description(fn (TaskService $record): string =>
-                        "Số lượng: {$record->quantity} " . ($record->service->unit ?? '')),
+                        "Số lượng: {$record->quantity} " . ($record->service_unit ?? '')),
 
                 Tables\Columns\TextColumn::make('money_received')
-                    ->label('Số tiền')
-                    ->money('VND')
-                    ->sortable(),
+                    ->label('Số tiền nhận')
+                    ->money('VND'),
 
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Trạng thái')
@@ -132,10 +152,13 @@ class TaskServiceResource extends Resource
                         default => $state,
                     }),
 
+                Tables\Columns\TextColumn::make('reporter.name')
+                    ->label('Người báo cáo')
+                    ->icon('heroicon-o-user'),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Ngày tạo')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
+                    ->label('Ngày báo cáo')
+                    ->dateTime('d/m/Y H:i'),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([

@@ -8,62 +8,112 @@ use Illuminate\Support\Carbon;
 
 class DashboardChart extends ChartWidget
 {
-    protected static ?string $heading = 'Doanh thu theo thời gian';
+    protected static ?string $heading = 'Doanh thu theo tháng';
 
     protected int | string | array $columnSpan = 'full';
     protected static ?int $sort = 2;
 
     protected function getFilters(): ?array
     {
-        return [
-            '7_days' => '7 ngày gần đây',
-            '10_days' => '10 ngày gần đây',
-            '30_days' => '30 ngày gần đây',
-            '90_day' => '90 ngày gần đây'
+        // Lấy tất cả các năm có trong TaskService
+        $years = TaskService::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year')
+            ->sortDesc() // Sắp xếp theo thứ tự giảm dần để năm mới nhất lên đầu
+            ->toArray();
+
+        // Thêm 'this_year' và 'last_year' vào đầu mảng
+        $filterOptions = [
+            'this_year' => 'Năm nay',
+            'last_year' => 'Năm trước',
         ];
+
+        // Thêm các năm từ dữ liệu vào mảng
+        foreach ($years as $year) {
+            $filterOptions[(string) $year] = "Năm $year";
+        }
+
+        return $filterOptions;
     }
 
     protected function getData(): array
     {
-        // Lấy bộ lọc hiện tại
-        $filter = $this->filter ?? '90_days';
+        // Lấy tất cả các năm có trong dữ liệu TaskService
+        $years = TaskService::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year');
 
-        // Xác định số ngày dựa trên bộ lọc
-        $days = match ($filter) {
-            '7_days' => 7,
-            '10_days' => 10,
-            '30_days' => 30,
-            '90_day' => 90,
-            default => 90,  
+        // Lấy giá trị filter từ tùy chọn (hoặc mặc định 'this_year')
+        $filter = $this->filter ?? 'this_year';
+
+        // Xử lý giá trị năm cho tùy chọn 'this_year' và 'last_year'
+        // Nếu không phải là các lựa chọn này, lọc theo năm trong dữ liệu
+        $year = match ($filter) {
+            'this_year' => now()->year,
+            'last_year' => now()->subYear()->year,
+            default => $years->contains($filter) ? $filter : now()->year,
         };
 
-        // Truy vấn dữ liệu
+        // Tổng doanh thu theo tháng cho năm đã chọn
         $data = TaskService::selectRaw('
-        DATE(created_at) as date,
-        SUM(money_received) as total_revenue,
-        COUNT(*) as total_services
+        MONTH(created_at) as month,
+        SUM(money_received) as total_revenue
     ')
-            ->whereDate('created_at', '>=', now()->subDays($days))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+            ->whereYear('created_at', $year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total_revenue', 'month');
+
+        $monthlyRevenue = collect(range(1, 12))->mapWithKeys(function ($month) use ($data) {
+            return [$month => $data->get($month, 0)];
+        });
+
+        // Doanh thu theo dịch vụ (5 dịch vụ hàng đầu)
+        $topServices = TaskService::join('services', 'task_services.service_id', '=', 'services.id')
+            ->selectRaw('
+            services.name as service_name,
+            SUM(task_services.money_received) as total_revenue
+        ')
+            ->whereYear('task_services.created_at', $year)
+            ->groupBy('services.name')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
+            ->pluck('total_revenue', 'service_name');
+
+        $serviceMonthlyData = [];
+        foreach ($topServices as $serviceName => $totalRevenue) {
+            $monthlyData = TaskService::join('services', 'task_services.service_id', '=', 'services.id')
+                ->selectRaw('
+                MONTH(task_services.created_at) as month,
+                SUM(task_services.money_received) as total_revenue
+            ')
+                ->whereYear('task_services.created_at', $year)
+                ->where('services.name', $serviceName)
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('total_revenue', 'month');
+
+            $serviceMonthlyData[] = [
+                'label' => $serviceName,
+                'data' => collect(range(1, 12))
+                    ->mapWithKeys(fn($month) => [$month => $monthlyData->get($month, 0)])
+                    ->values()
+                    ->toArray(),
+                'borderColor' => '#' . substr(md5($serviceName), 0, 6),
+                'fill' => false,
+            ];
+        }
 
         return [
-            'datasets' => [
+            'datasets' => array_merge([
                 [
-                    'label' => 'Doanh thu',
-                    'data' => $data->pluck('total_revenue')->toArray(),
+                    'label' => 'Doanh thu tổng',
+                    'data' => $monthlyRevenue->values()->toArray(),
                     'borderColor' => '#10B981',
-                    'fill' => false
+                    'fill' => false,
                 ],
-                [
-                    'label' => 'Số lượng dịch vụ',
-                    'data' => $data->pluck('total_services')->toArray(),
-                    'borderColor' => '#3B82F6',
-                    'fill' => false
-                ]
-            ],
-            'labels' => $data->pluck('date')->map(fn($date) => Carbon::parse($date)->format('d/m'))->toArray(),
+            ], $serviceMonthlyData),
+            'labels' => $monthlyRevenue->keys()->map(fn($month) => "Tháng $month")->toArray(),
         ];
     }
 

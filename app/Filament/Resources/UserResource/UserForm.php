@@ -17,7 +17,10 @@ class UserForm
             ->schema([
                 self::createLeftColumn(),
                 self::createRightColumn()
-            ])->columns(12);
+            ])->columns([
+                'sm' => 1,        // 1 cột trên mobile
+                'lg' => 12        // 12 cột trên desktop
+            ]);
     }
 
     private static function createLeftColumn(): Section
@@ -52,7 +55,10 @@ class UserForm
                     ->visible(fn(string $operation): bool => $operation === 'create')
                     ->dehydrated(false),
 
-            ])->columnSpan(8);
+            ])->columnSpan([
+                'sm' => 'full',   // Full width trên mobile
+                'lg' => 8         // 8 cột trên desktop
+            ]);
     }
 
     private static function createRightColumn(): Section
@@ -67,6 +73,9 @@ class UserForm
                     ->searchable()
                     ->required()
 
-            ])->columnSpan(4);
+            ])->columnSpan([
+                'sm' => 'full',   // Full width trên mobile
+                'lg' => 4         // 4 cột trên desktop
+            ]);
     }
 }

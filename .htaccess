@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Chuyển hướng HTTP sang HTTPS
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE]
+    
+    # Chuyển hướng vào thư mục public
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ /public/$1 [L,QSA]
+</IfModule>
+
+# PHP Handler
+AddHandler application/x-httpd-php83 .php
+
+# Security Headers
+Header always set Content-Security-Policy "upgrade-insecure-requests;"
+## ONEPANEL Force HTTPS by SSL installation
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE]
+Header always set Content-Security-Policy "upgrade-insecure-requests;"
+## ONEPANEL Force HTTPS by SSL installation end

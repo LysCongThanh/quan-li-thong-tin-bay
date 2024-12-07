@@ -22,6 +22,10 @@ class CreateTaskService extends CreateRecord
         ];
     }
 
+    public function getTitle(): string {
+        return "Báo cáo công việc";
+    }
+
     public int $task_id;
 
     public function mount($task_id = null): void

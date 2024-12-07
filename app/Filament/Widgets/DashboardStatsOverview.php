@@ -79,12 +79,12 @@ class DashboardStatsOverview extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-m-chart-bar')
                 ->color('warning'),
 
-            // Top dịch vụ
-            Stat::make('Top dịch vụ sử dụng', $topServices->pluck('service.name')->first() ?? 'N/A')
-                ->description(implode(' | ', array_map(
-                    fn($service) => $service['service']['name'] . ': ' . $service['usage_count'],
-                    $topServices->take(3)->toArray()
-                )))
+            Stat::make('Top dịch vụ sử dụng', $topServices->first()?->service?->name ?? 'N/A')
+                ->description($topServices->map(function($service) {
+                    return $service->service
+                        ? "{$service->service->name}: {$service->usage_count}"
+                        : null;
+                })->filter()->join(' | ') ?: 'Chưa có dữ liệu')
                 ->descriptionIcon('heroicon-m-star')
                 ->color('success'),
         ];
