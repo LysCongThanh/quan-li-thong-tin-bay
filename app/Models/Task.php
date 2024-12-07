@@ -13,12 +13,15 @@ class Task extends Model
 
     protected $fillable = [
         'name',
+        'customer_id',
         'description',
-        'customer_name',
         'pilot_id',
         'support_id'
     ];
-
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
     public function pilot(): BelongsTo
     {
         return $this->belongsTo(User::class, 'pilot_id');

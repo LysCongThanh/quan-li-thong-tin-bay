@@ -3,14 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TaskResource\Pages;
+use App\Models\Customer;
 use App\Models\Task;
-use Filament\Tables\Actions\ActionGroup;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Textarea;
 
 class TaskResource extends Resource
 {
@@ -41,11 +43,11 @@ class TaskResource extends Resource
                             ->maxLength(255),
                         Forms\Components\Textarea::make('description')
                             ->label('Mô tả')
+                            ->rows(4)
                             ->required()
                             ->placeholder('Mô tả chi tiết công việc')
-                            ->maxLength(255)
                             ->columnSpanFull(),
-                    ])->columnSpan(1),
+                    ])->columnSpan(['lg' => 1, 'sm' => 'full']),
 
                 Forms\Components\Section::make('Phân công nhân sự')
                     ->description('Chọn nhân sự thực hiện công việc')
@@ -56,7 +58,7 @@ class TaskResource extends Resource
                             ->relationship(
                                 'pilot',
                                 'name',
-                                fn ($query) => $query->whereHas('roles', fn($q) => $q->where('name', 'Nhân viên'))
+                                fn($query) => $query->whereHas('roles', fn($q) => $q->where('name', 'Nhân viên'))
                             )
                             ->searchable()
                             ->preload()
@@ -78,7 +80,7 @@ class TaskResource extends Resource
                                     $query->whereHas('roles', fn($q) => $q->where('name', 'Nhân viên'))
                                         ->when(
                                             $get('pilot_id'),
-                                            fn ($q) => $q->where('id', '!=', $get('pilot_id'))
+                                            fn($q) => $q->where('id', '!=', $get('pilot_id'))
                                         );
                                 }
                             )
@@ -86,20 +88,106 @@ class TaskResource extends Resource
                             ->preload()
                             ->required()
                             ->placeholder('Chọn nhân viên hỗ trợ')
-                            ->disabled(fn (Forms\Get $get) => ! $get('pilot_id')),
-                    ])->columnSpan(1),
+                            ->disabled(fn(Forms\Get $get) => !$get('pilot_id')),
+                    ])->columnSpan(['lg' => 1, 'sm' => 'full']),
 
                 Forms\Components\Section::make('Thông tin khách hàng')
                     ->description('Thông tin về khách hàng yêu cầu công việc')
                     ->icon('heroicon-o-user')
                     ->schema([
-                        Forms\Components\TextInput::make('customer_name')
+                        Forms\Components\Select::make('customer_id')
                             ->label('Tên khách hàng')
+                            ->options(Customer::all()->pluck('name', 'id'))
+                            ->searchable()
                             ->required()
-                            ->placeholder('Nhập tên khách hàng')
-                            ->maxLength(255),
-                    ])->columnSpan(1),
-            ])->columns(2);
+                            ->placeholder('Chọn tên khách hàng')
+                            ->live()
+                            ->afterStateHydrated(function ($state, Forms\Set $set) {
+                                // Fill data khi load form edit
+                                if ($state) {
+                                    $customer = Customer::find($state);
+                                    $set('customer_email', $customer->email);
+                                    $set('customer_phone', $customer->phone);
+                                    $set('customer_address', $customer->address);
+                                }
+                            })
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                // Update khi chọn customer mới
+                                if ($state) {
+                                    $customer = Customer::find($state);
+                                    $set('customer_email', $customer->email);
+                                    $set('customer_phone', $customer->phone);
+                                    $set('customer_address', $customer->address);
+                                } else {
+                                    $set('customer_email', null);
+                                    $set('customer_phone', null);
+                                    $set('customer_address', null);
+                                }
+                            })
+                            ->createOptionForm([
+                                Forms\Components\Section::make()
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->label('Tên khách hàng')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->placeholder('Nhập tên khách hàng')
+                                            ->columnSpan(1),
+
+                                        TextInput::make('email')
+                                            ->label('Email')
+                                            ->email()
+                                            ->unique('customer', 'email')
+                                            ->nullable()
+                                            ->placeholder('example@domain.com')
+                                            ->columnSpan(1),
+
+                                        TextInput::make('phone')
+                                            ->label('Số điện thoại')
+                                            ->tel()
+                                            ->nullable()
+                                            ->placeholder('0123456789')
+                                            ->columnSpan(1),
+
+                                        Textarea::make('address')
+                                            ->label('Địa chỉ')
+                                            ->nullable()
+                                            ->placeholder('Nhập địa chỉ')
+                                            ->rows(4)
+                                            ->columnSpan('full'),
+                                    ])
+                                    ->columns(3)
+                            ])
+                            ->createOptionUsing(function (array $data) {
+                                $customer = Customer::create($data);
+                                return $customer->id;
+                            })
+                            ->createOptionModalHeading('Thêm khách hàng mới'),
+                        Forms\Components\Grid::make()
+                            ->schema([
+                                Forms\Components\TextInput::make('customer_email')
+                                    ->label('Email')
+                                    ->disabled()
+                                    ->dehydrated(false),
+
+                                Forms\Components\TextInput::make('customer_phone')
+                                    ->label('Số điện thoại')
+                                    ->disabled()
+                                    ->dehydrated(false),
+
+                                Forms\Components\Textarea::make('customer_address')
+                                    ->label('Địa chỉ')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2)
+                            ->visible(fn(Forms\Get $get) => filled($get('customer_id')))
+                    ])->columnSpan(2),
+            ])->columns([
+                'sm' => 1, // 1 cột trên mobile
+                'lg' => 2  // 2 cột trên desktop
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -110,11 +198,9 @@ class TaskResource extends Resource
                     ->label('Tên công việc')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold')
-                    ->description(fn(Task $record): string => $record->description)
-                    ->width(300),
+                    ->weight('bold'),
 
-                TextColumn::make('customer_name')
+                TextColumn::make('customer.name')
                     ->label('Khách hàng')
                     ->searchable()
                     ->sortable()
@@ -146,21 +232,44 @@ class TaskResource extends Resource
                 Tables\Filters\SelectFilter::make('support')
                     ->relationship('support', 'name')
                     ->label('Lọc theo nhân viên hỗ trợ'),
-            ])
+//                Tables\Filters\Filter::make('created_at')
+//                    ->form([
+//                        Forms\Components\DatePicker::make('created_from')
+//                            ->label('Từ ngày')
+//                            ->columnSpan(1)
+//                            ->native(false)
+//                            ->displayFormat('d/m/Y'),
+//                        Forms\Components\DatePicker::make('created_until')
+//                            ->label('Đến ngày')
+//                            ->columnSpan(1)
+//                            ->native(false)
+//                            ->displayFormat('d/m/Y'),
+//                    ])
+//                    ->columns(2)
+//                    ->columnSpan(2)
+//                    ->query(function (Builder $query, array $data): Builder {
+//                        return $query
+//                            ->when(
+//                                $data['created_from'],
+//                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+//                            )
+//                            ->when(
+//                                $data['created_until'],
+//                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+//                            );
+//                    }),
+            ], layout: Tables\Enums\FiltersLayout::Dropdown)
             ->filtersFormColumns(2)
             ->actions([
-                ActionGroup::make([
-                    Tables\Actions\ViewAction::make()
-                        ->modalWidth('5xl')
-                        ->modalHeading('Chi tiết công việc'),
-                    Tables\Actions\EditAction::make()
-                        ->visible(fn() => auth()->user()->hasRole(['super_admin', 'owner'])),
-                    Tables\Actions\Action::make('report')
-                        ->label('Báo cáo công việc')
-                        ->icon('heroicon-o-document-text')
-                        ->color('success')
-                        ->url(fn(Task $record): string => TaskServiceResource::getUrl('list', ['task_id' => $record->id]))
-                ])
+                Tables\Actions\ViewAction::make()
+                    ->visible(fn() => !auth()->user()->hasRole(['super_admin', 'owner'])),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['super_admin', 'owner'])),
+                Tables\Actions\Action::make('report')
+                    ->label('Báo cáo công việc')
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->url(fn(Task $record): string => TaskServiceResource::getUrl('list', ['task_id' => $record->id]))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
