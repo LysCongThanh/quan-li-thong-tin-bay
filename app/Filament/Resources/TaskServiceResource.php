@@ -83,6 +83,7 @@ class TaskServiceResource extends Resource
                     ->icon('heroicon-o-flag')
                     ->schema([
                         Forms\Components\Select::make('status')
+                            ->label('Trạng thái')
                             ->options([
                                 'pending' => 'Chờ xử lý',
                                 'in_progress' => 'Đang thực hiện',
