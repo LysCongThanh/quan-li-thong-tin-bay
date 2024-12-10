@@ -10,7 +10,7 @@ class Service extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','unit'];
+    protected $fillable = ['name','unit','price'];
 
     public function taskServices(): HasMany
     {
