@@ -14,6 +14,9 @@ class ListTaskServices extends ListRecords
 {
     protected static string $resource = TaskServiceResource::class;
 
+    protected static ?string $breadcrumb = 'Danh Sách';
+
+
     public function getHeaderWidgets(): array
     {
         return [
