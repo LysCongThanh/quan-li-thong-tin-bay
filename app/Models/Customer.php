@@ -14,4 +14,13 @@ class Customer extends Model
     {
         return $this->hasMany(Task::class); // Nếu liên kết qua tên
     }
+    public function services()
+    {
+        return $this->hasManyThrough(
+            TaskService::class,
+            Task::class,
+            'customer_id',
+            'task_id'
+        )->leftJoin('services', 'services.id', '=', 'task_services.service_id');
+    }
 }
