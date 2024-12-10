@@ -79,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
                 TaskResource::class,
                 ServiceResource::class,
                 TaskServiceResource::class,
-//                CustomerResource::class,
+                CustomerResource::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
