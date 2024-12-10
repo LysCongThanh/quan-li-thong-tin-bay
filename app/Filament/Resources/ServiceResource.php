@@ -23,6 +23,10 @@ class ServiceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Dịch Vụ';
 
+    protected static ?string $modelLabel = 'dịch vụ';
+
+
+
     protected static ?string $model = Service::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rocket-launch';
@@ -49,7 +53,12 @@ class ServiceResource extends Resource
                                     ->label('Đơn vị')
                                     ->placeholder('Nhập đơn vị...')
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'Đơn vị: Bình, bao,..')
-                                    ->required()
+                                    ->required(),
+                                TextInput::make('price')
+                                    ->label('Giá')
+                                    ->placeholder('Nhập giá...')
+                                    ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'Giá: 400, 150,..')
+                                    ->required(),
                             ])
                     ]),
             ]);
@@ -65,6 +74,9 @@ class ServiceResource extends Resource
                 TextColumn::make('unit')
                     ->label('Đơn vị')
                     ->searchable(),
+                TextColumn::make('price')
+                    ->label('Giá')
+                    ->formatStateUsing(fn ($state) => number_format($state, 0) . ' vnđ'),
                 TextColumn::make('created_at')
                     ->label('Ngày thêm')
                     ->date('d/m/Y')
@@ -86,12 +98,14 @@ class ServiceResource extends Resource
             ]);
     }
 
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
+
 
     public static function getPages(): array
     {
