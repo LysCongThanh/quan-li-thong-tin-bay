@@ -10,6 +10,8 @@ class ListTasks extends ListRecords
 {
     protected static string $resource = TaskResource::class;
 
+    protected static ?string $breadcrumb = 'Danh Sách';
+
     protected function getHeaderActions(): array
     {
         return [
