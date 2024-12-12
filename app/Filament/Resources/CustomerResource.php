@@ -40,8 +40,7 @@ class CustomerResource extends Resource
                         TextInput::make('email')
                             ->label('Email')
                             ->placeholder('Nhập email...')
-                            ->email()
-                            ->required(),
+                            ->email(),
                         TextInput::make('phone')
                             ->placeholder('Nhập số điện thoại...')
                             ->label('Số Điện Thoại'),
@@ -93,7 +92,7 @@ class CustomerResource extends Resource
             'history' => Pages\History::route('history/{customer_id}'),
             'index' => Pages\ListCustomers::route('/'),
             'create' => Pages\CreateCustomer::route('/create'),
-            'edit' => Pages\EditCustomer::route('/{record}/edit'),
+//            'edit' => Pages\EditCustomer::route('/{record}/edit'),
         ];
     }
 }
