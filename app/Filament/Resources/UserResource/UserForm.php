@@ -19,7 +19,7 @@ class UserForm
                 self::createRightColumn()
             ])->columns([
                 'sm' => 1,        // 1 cột trên mobile
-                'lg' => 12        // 12 cột trên desktop
+                'lg' => 12
             ]);
     }
 
@@ -28,7 +28,7 @@ class UserForm
         return Section::make('Thông tin người dùng')
             ->schema([
                 TextInput::make('name')
-                    ->label('Tên')
+                    ->label('Tên người dùng')
                     ->required()
                     ->maxLength(255),
 
@@ -39,8 +39,8 @@ class UserForm
                     ->unique(ignoreRecord: true),
 
                 TextInput::make('password')
-                    ->label('Mật khẩu')
                     ->password()
+                    ->label('Mật khẩu')
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->minLength(8)
                     ->same('password_confirmation')
@@ -49,7 +49,7 @@ class UserForm
 
                 TextInput::make('password_confirmation')
                     ->password()
-                    ->label('Xác nhận mật khẩu')
+                    ->label('Nhập lại mật khẩu')
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->minLength(8)
                     ->visible(fn(string $operation): bool => $operation === 'create')
@@ -57,7 +57,7 @@ class UserForm
 
             ])->columnSpan([
                 'sm' => 'full',   // Full width trên mobile
-                'lg' => 8         // 8 cột trên desktop
+                'lg' => 8
             ]);
     }
 

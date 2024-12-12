@@ -10,6 +10,11 @@ class RevenueFromCustomerChart extends ChartWidget
 
     protected static ?string $heading = 'Top doanh thu từ khách hàng cao nhất';
 
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_RevenueFromCustomerChart');
+    }
+
     protected int | string | array $columnSpan = 'full';
 
     protected static ?int $sort = 5;

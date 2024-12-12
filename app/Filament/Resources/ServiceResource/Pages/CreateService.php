@@ -11,7 +11,7 @@ class CreateService extends CreateRecord
 
     protected static string $resource = ServiceResource::class;
 
-
+    protected ?string $heading = 'Tạo mới dịch vụ';
 
 }
 

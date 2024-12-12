@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardStatsOverview extends StatsOverviewWidget
 {
+    protected ?string $heading = 'Tổng quan doanh thu';
+
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_DashboardStatsOverview');
+    }
+
     protected function getStats(): array
     {
         // Thống kê Task

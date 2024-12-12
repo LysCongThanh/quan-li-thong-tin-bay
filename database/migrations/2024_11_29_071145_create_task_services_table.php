@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('service_id')->nullable()->constrained()->nullOnDelete(); // Đổi thành nullOnDelete
             $table->foreignId('task_id')->constrained()->onDelete('cascade');
-            $table->string('service_name')->nullable(); // Thêm trường lưu tên service
-            $table->string('service_unit')->nullable(); // Thêm trường lưu đơn vị
+            $table->string('service_name')->nullable();
+            $table->string('service_unit')->nullable();
+            $table->decimal('service_price', 11, 0)->nullable();
             $table->integer('quantity')->nullable();
             $table->decimal('money_received', 15, 0)->nullable();
             $table->string('status')->nullable();

@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\CustomerResource;
+use App\Filament\Resources\EmployeeStatisticResource;
 use App\Filament\Resources\ServiceResource;
 use App\Filament\Resources\TaskResource;
 use App\Filament\Resources\TaskServiceResource;
@@ -12,6 +13,7 @@ use App\Filament\Widgets\DashboardStatsOverview;
 use App\Filament\Widgets\EmployeeCompleteTaskChart;
 use App\Filament\Widgets\RevenueFromCustomerChart;
 use App\Filament\Widgets\TaskServiceChart;
+use App\Http\Middleware\StoreUserRoleMiddleware;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -35,14 +37,12 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->favicon(asset('/images/logo-goldenbee.png'))
+            ->brandLogo(asset('/images/logo-goldenbee.png'))
             ->spa()
             ->breadcrumbs(true)
             ->sidebarWidth('300px')
             ->collapsedSidebarWidth('5rem')
-            ->default()
-                        ->brandLogo('https://goldenbeeltd.vn/storage/images/logo-goldenbee.png')
-            ->favicon('https://goldenbeeltd.vn/storage/images/logo-goldenbee.png')
-                        ->brandLogoHeight('45px')
             ->id('admin')
             ->path('')
             ->login(Login::class)
@@ -52,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-               Pages\Dashboard::class,
+                Pages\Dashboard::class
             ])
             ->widgets([
                 DashboardStatsOverview::class,
@@ -72,17 +72,19 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                StoreUserRoleMiddleware::class
             ])
             ->authGuard('web')
             ->authMiddleware([
                 Authenticate::class,
             ])
             ->resources([
-                TaskResource::class,
                 UserResource::class,
+                TaskResource::class,
                 ServiceResource::class,
                 TaskServiceResource::class,
-//                CustomerResource::class,
+                CustomerResource::class,
+                EmployeeStatisticResource::class
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),

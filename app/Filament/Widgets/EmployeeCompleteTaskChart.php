@@ -10,6 +10,11 @@ class EmployeeCompleteTaskChart extends ChartWidget
 
     protected static ?string $heading = 'Tổng doanh thu theo nhân viên thực hiện nhiệm vụ';
 
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_EmployeeCompleteTaskChart');
+    }
+
     protected static ?int $sort = 4;
 
     protected function getData(): array

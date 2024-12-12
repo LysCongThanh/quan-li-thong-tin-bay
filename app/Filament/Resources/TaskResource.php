@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TaskResource\Pages;
 use App\Models\Customer;
 use App\Models\Task;
+use Carbon\Carbon;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class TaskResource extends Resource
 {
@@ -137,7 +139,7 @@ class TaskResource extends Resource
                                         TextInput::make('email')
                                             ->label('Email')
                                             ->email()
-                                            ->unique('customer', 'email')
+                                            ->unique('customers', 'email')
                                             ->nullable()
                                             ->placeholder('example@domain.com')
                                             ->columnSpan(1),
@@ -193,6 +195,16 @@ class TaskResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                if (auth()->user()->hasRole(['super_admin', 'owner'])) {
+                    return $query;
+                }
+
+                return $query->where(function ($q) {
+                    $q->where('pilot_id', auth()->id())
+                        ->orWhere('support_id', auth()->id());
+                });
+            })
             ->columns([
                 TextColumn::make('name')
                     ->label('Tên công việc')
@@ -232,32 +244,42 @@ class TaskResource extends Resource
                 Tables\Filters\SelectFilter::make('support')
                     ->relationship('support', 'name')
                     ->label('Lọc theo nhân viên hỗ trợ'),
-//                Tables\Filters\Filter::make('created_at')
-//                    ->form([
-//                        Forms\Components\DatePicker::make('created_from')
-//                            ->label('Từ ngày')
-//                            ->columnSpan(1)
-//                            ->native(false)
-//                            ->displayFormat('d/m/Y'),
-//                        Forms\Components\DatePicker::make('created_until')
-//                            ->label('Đến ngày')
-//                            ->columnSpan(1)
-//                            ->native(false)
-//                            ->displayFormat('d/m/Y'),
-//                    ])
-//                    ->columns(2)
-//                    ->columnSpan(2)
-//                    ->query(function (Builder $query, array $data): Builder {
-//                        return $query
-//                            ->when(
-//                                $data['created_from'],
-//                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
-//                            )
-//                            ->when(
-//                                $data['created_until'],
-//                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
-//                            );
-//                    }),
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\DatePicker::make('created_from')
+                                    ->label('Từ ngày'),
+                                Forms\Components\DatePicker::make('created_until')
+                                    ->label('Đến ngày'),
+                            ])
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['created_from'] ?? null) {
+                            $indicators[] = Tables\Filters\Indicator::make('Từ ngày ' . Carbon::parse($data['created_from'])->format('d/m/Y'))
+                                ->removeField('created_from');
+                        }
+
+                        if ($data['created_until'] ?? null) {
+                            $indicators[] = Tables\Filters\Indicator::make('Đến ngày ' . Carbon::parse($data['created_until'])->format('d/m/Y'))
+                                ->removeField('created_until');
+                        }
+
+                        return $indicators;
+                    })->columnSpanFull()
             ], layout: Tables\Enums\FiltersLayout::Dropdown)
             ->filtersFormColumns(2)
             ->actions([
