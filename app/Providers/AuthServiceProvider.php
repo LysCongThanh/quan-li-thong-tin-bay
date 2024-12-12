@@ -13,7 +13,11 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        'App\Filament\Widgets\DashboardStatsOverview' => 'App\Policies\WidgetPolicy',
+        'App\Filament\Widgets\DashboardChart' => 'App\Policies\WidgetPolicy',
+        'App\Filament\Widgets\TaskServiceChart' => 'App\Policies\WidgetPolicy',
+        'App\Filament\Widgets\EmployeeCompleteTaskChart' => 'App\Policies\WidgetPolicy',
+        'App\Filament\Widgets\RevenueFromCustomerChart' => 'App\Policies\WidgetPolicy',
     ];
 
     /**

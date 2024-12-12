@@ -21,6 +21,8 @@ class UserResource extends Resource
 
     protected static ?string $navigationGroup = 'Phân quyền';
 
+    protected static ?string $pluralModelLabel = "Người dùng";
+
     public static function form(Form $form): Form
     {
         return UserForm::form($form);

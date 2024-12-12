@@ -19,15 +19,16 @@ class UserForm
                 self::createRightColumn()
             ])->columns([
                 'sm' => 1,        // 1 cột trên mobile
-                'lg' => 12        // 12 cột trên desktop
+                'lg' => 12
             ]);
     }
 
     private static function createLeftColumn(): Section
     {
-        return Section::make('User Information')
+        return Section::make('Thông tin người dùng')
             ->schema([
                 TextInput::make('name')
+                    ->label('Tên người dùng')
                     ->required()
                     ->maxLength(255),
 
@@ -39,6 +40,7 @@ class UserForm
 
                 TextInput::make('password')
                     ->password()
+                    ->label('Mật khẩu')
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->minLength(8)
                     ->same('password_confirmation')
@@ -47,6 +49,7 @@ class UserForm
 
                 TextInput::make('password_confirmation')
                     ->password()
+                    ->label('Nhập lại mật khẩu')
                     ->required(fn(string $operation): bool => $operation === 'create')
                     ->minLength(8)
                     ->visible(fn(string $operation): bool => $operation === 'create')
@@ -54,15 +57,16 @@ class UserForm
 
             ])->columnSpan([
                 'sm' => 'full',   // Full width trên mobile
-                'lg' => 8         // 8 cột trên desktop
+                'lg' => 8
             ]);
     }
 
     private static function createRightColumn(): Section
     {
-        return Section::make('Roles')
+        return Section::make('Vai trò')
             ->schema([
                 Select::make('roles')
+                    ->label('Vai trò')
                     ->multiple()
                     ->relationship('roles', 'name')
                     ->preload()

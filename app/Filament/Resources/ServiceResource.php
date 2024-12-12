@@ -37,7 +37,7 @@ class ServiceResource extends Resource
                     ->description('Mỗi dịch vụ đại diện cho một hoạt động nông nghiệp cụ thể như xịt thuốc, xạ phân, cày xới đất,... Thông tin này sẽ được sử dụng trong các báo cáo công việc.')
                     ->icon('heroicon-o-rocket-launch')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Forms\Components\Grid::make(3)
                             ->schema([
                                 TextInput::make('name')
                                     ->label('Tên dịch vụ')
@@ -49,6 +49,14 @@ class ServiceResource extends Resource
                                     ->label('Đơn vị')
                                     ->placeholder('Nhập đơn vị...')
                                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'Đơn vị: Bình, bao,..')
+                                    ->required(),
+                                TextInput::make('price')
+                                    ->label('Giá dịch vụ')
+                                    ->suffix('VND')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->placeholder('Nhập giá dịch vụ...')
+                                    ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'VD: 100,000 VND')
                                     ->required()
                             ])
                     ]),
@@ -65,6 +73,12 @@ class ServiceResource extends Resource
                 TextColumn::make('unit')
                     ->label('Đơn vị')
                     ->searchable(),
+                TextColumn::make('price')
+                    ->label('Giá tiền')
+                    ->money('VND')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.') . ' VND'),
                 TextColumn::make('created_at')
                     ->label('Ngày thêm')
                     ->date('d/m/Y')

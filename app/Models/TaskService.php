@@ -30,6 +30,7 @@ class TaskService extends Model
             if ($service = $taskService->service) {
                 $taskService->service_name = $service->name;
                 $taskService->service_unit = $service->unit;
+                $taskService->service_price = $service->price;
             }
         });
 
@@ -37,6 +38,7 @@ class TaskService extends Model
             if ($service = $taskService->service) {
                 $taskService->service_name = $service->name;
                 $taskService->service_unit = $service->unit;
+                $taskService->service_price = $service->price;
             }
         });
     }

@@ -16,10 +16,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\DB;
 
 class TaskServiceResource extends Resource
 {
     protected static ?string $model = TaskService::class;
+
+    protected static ?string $pluralModelLabel = 'Báo cáo công việc';
+
+    protected static ?string $modelLabel = 'Báo cáo công việc';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -27,6 +32,9 @@ class TaskServiceResource extends Resource
     {
         return false;
     }
+
+    public static array $tableColumns = [];
+    public static $tableQuery;
 
     public static function getWidgets(): array
     {
@@ -68,8 +76,8 @@ class TaskServiceResource extends Resource
 
                         Forms\Components\TextInput::make('money_received')
                             ->numeric()
-                            ->label('Số tiền')
-                            ->placeholder('Nhập số tiền')
+                            ->label('Số tiền nhận')
+                            ->placeholder('Nhập số tiền nhận...')
                             ->prefix('VND')
                             ->numeric()
                             ->columnSpan(['sm' => 'full', 'lg' => 1]),
@@ -83,6 +91,7 @@ class TaskServiceResource extends Resource
                     ->icon('heroicon-o-flag')
                     ->schema([
                         Forms\Components\Select::make('status')
+                            ->label('Trạng thái')
                             ->options([
                                 'pending' => 'Chờ xử lý',
                                 'in_progress' => 'Đang thực hiện',
@@ -117,7 +126,8 @@ class TaskServiceResource extends Resource
     public static function table(Table $table): Table
     {
         $taskId = request()->route('task_id');
-        if (!$taskId || !Task::find($taskId)) {
+
+        if ((!$taskId || !Task::find($taskId))) {
             abort(404);
         }
 
@@ -125,13 +135,19 @@ class TaskServiceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('service_name')
                     ->label('Tên dịch vụ')
-                    ->description(fn (TaskService $record): string =>
-                        "Số lượng: {$record->quantity} " . ($record->service_unit ?? '')),
-
+                    ->description(fn ($record) =>
+                        "Số lượng: {$record->quantity} " . ($record->service_unit ?? '') . ", " .
+                        "Đơn giá: " . number_format($record->service_price ?? 0, 0, ',', '.') . " VNĐ"
+                    ),
+                Tables\Columns\TextColumn::make('total_price')
+                    ->label('Tổng tiền')
+                    ->money('VND')
+                    ->getStateUsing(fn ($record) =>
+                        ($record->quantity ?? 0) * ($record->service_price ?? 0)
+                    ),
                 Tables\Columns\TextColumn::make('money_received')
                     ->label('Số tiền nhận')
                     ->money('VND'),
-
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Trạng thái')
                     ->colors([
@@ -147,14 +163,11 @@ class TaskServiceResource extends Resource
                         'cancelled' => 'Đã hủy',
                         default => $state,
                     }),
-
                 Tables\Columns\TextColumn::make('reporter.name')
-                    ->label('Người báo cáo')
-                    ->icon('heroicon-o-user'),
-
+                    ->label('Người tạo báo cáo'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Ngày báo cáo')
-                    ->dateTime('d/m/Y H:i'),
+                    ->label('Ngày tạo')
+                    ->dateTime('d/m/Y H:i')
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
@@ -183,6 +196,7 @@ class TaskServiceResource extends Resource
     {
         return [
             'list' => Pages\ListTaskServices::route('/{task_id}'),
+            'history' => Pages\ListTaskServices::route('/history/{customer_id}/'),
             'index' => Pages\ListTaskServices::route('/'),
             'create' => Pages\CreateTaskService::route('/create/{task_id}'),
             'edit' => Pages\EditTaskService::route('/{record}/edit'),

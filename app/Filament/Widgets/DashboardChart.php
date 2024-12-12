@@ -10,6 +10,11 @@ class DashboardChart extends ChartWidget
 {
     protected static ?string $heading = 'Doanh thu theo tháng';
 
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_DashboardChart');
+    }
+
     protected int | string | array $columnSpan = 'full';
     protected static ?int $sort = 2;
 

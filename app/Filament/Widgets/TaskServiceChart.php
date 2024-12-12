@@ -10,6 +10,11 @@ class TaskServiceChart extends ChartWidget
 
     protected static ?string $heading = 'Tổng số công việc theo trạng thái';
 
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_TaskServiceChart');
+    }
+
     protected static ?int $sort = 3;
 
     protected function getData(): array
